@@ -57,8 +57,10 @@ function! isort#Isort(startline, endline)
             call jobclose(s:job, 'stdin')
         endif
 
-    elseif exists('*job_start')
+    elseif v:version >= 800
         " Vim 8 (async)
+        " Note that 7.4 can be compiled with the +job flag, but the API has
+        " evolved a lot...
         if exists('s:job') && job_status(s:job) != 'stop'
             call job_stop(s:job)
         endif
@@ -69,10 +71,10 @@ function! isort#Isort(startline, endline)
             \ 'in_mode': 'nl',
             \ })
 
-        let channel = job_getchannel(s:job)
-        if ch_status(channel) ==# 'open'
-            call ch_sendraw(channel, l:lines)
-            call ch_close_in(channel)
+        let l:channel = job_getchannel(s:job)
+        if ch_status(l:channel) ==# 'open'
+            call ch_sendraw(l:channel, l:lines)
+            call ch_close_in(l:channel)
         endif
     else
         " Legacy (synchronous)
