@@ -12,7 +12,7 @@ command! -range=% Isort :<line1>,<line2>! isort -
 
 ...but significantly faster & without the annoying cursor jump.
 
-Designed to run asynchronously in Vim 8 + Neovim, but also backwards-compatible
+Designed to run asynchronously in Vim 8 + Neovim, but also backward-compatible
 with older versions of Vim.
 
 ## Installation

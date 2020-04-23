@@ -1,1 +1,1 @@
-command! -range=% Isort call isort#IsortLines(<line1>, <line2>)
+command! -range=% Isort call isort#Isort(<line1>, <line2>)
