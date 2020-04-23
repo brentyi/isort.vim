@@ -2,7 +2,7 @@
 
 A lighter, pure-Vimscript version of fisadev's wonderful
 [vim-isort](https://github.com/fisadev/vim-isort) plugin. Mostly written to
-solve some startup time + virtual environment issues.
+solve performance + virtual environment issues.
 
 Equivalent to:
 
@@ -10,7 +10,10 @@ Equivalent to:
 command! -range=% Isort :<line1>,<line2>! isort -
 ```
 
-...but slightly faster & without the annoying cursor jump.
+...but significantly faster & without the annoying cursor jump.
+
+Designed to run asynchronously in Vim 8 + Neovim, but also backwards-compatible
+with older versions of Vim.
 
 ## Installation
 
