@@ -42,3 +42,11 @@ augroup IsortMappings
     autocmd FileType python vnoremap <buffer> <Leader>si :Isort<CR>
 augroup END
 ```
+
+We can also add callback function via the
+`isort#Isort(startline, endline, callback)` function. For example, we can use
+vim-codefmt to format after sorting:
+
+```
+call isort#Isort(1, line('$'), function('codefmt#FormatBuffer'))
+```

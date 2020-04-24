@@ -19,9 +19,14 @@ function! s:IsortDoneCallback()
         execute (s:startline + s:line_counter) . ',' . s:endline . 'd _'
         call setpos('.', l:cursor_pos)
     endif
+
+    " Done!
+    if exists('s:callback')
+        call s:callback()
+    endif
 endfunction
 
-function! isort#Isort(startline, endline)
+function! isort#Isort(startline, endline, ...)
     " Make sure isort is installed
     if !executable('isort')
         echoerr 'isort is not installed!'
@@ -32,6 +37,13 @@ function! isort#Isort(startline, endline)
     let s:startline = a:startline
     let s:endline = a:endline
     let s:line_counter = 0
+
+    " Accept callback
+    if a:0 == 1
+        let s:callback = a:1
+    elseif exists('s:callback')
+        unlet s:callback
+    endif
 
     " Start job
     let l:cmd = 'isort -'
@@ -81,5 +93,10 @@ function! isort#Isort(startline, endline)
         let l:cursor_pos = getpos('.')
         execute a:startline . ',' . a:endline . '! isort -'
         call setpos('.', l:cursor_pos)
+
+        " Done!
+        if exists('s:callback')
+            call s:callback()
+        endif
     endif
 endfunction
