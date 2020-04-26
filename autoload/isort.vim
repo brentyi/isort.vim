@@ -1,11 +1,19 @@
 function! s:IsortLineCallback(formatted_lines)
+    if has('nvim')
+        " We get an extra blank line in Neovim
+        " Not really sure why...
+        let l:formatted_lines = a:formatted_lines[:-2]
+    else
+        let l:formatted_lines = a:formatted_lines
+    endif
     if s:startline + s:line_counter <= s:endline
         " Modify an existing line
-        call setline(s:startline + s:line_counter, a:formatted_lines)
+        call setline(s:startline + s:line_counter, l:formatted_lines)
     else
         " Add a new line
-        call append(s:endline, a:formatted_lines)
-        let s:endline += 1
+        echom string(l:formatted_lines)
+        call append(s:endline, l:formatted_lines)
+        let s:endline += len(l:formatted_lines)
     endif
 
     " Increment line counter
@@ -59,6 +67,7 @@ function! isort#Isort(startline, endline, ...)
         let s:job = jobstart(l:cmd, {
             \ 'on_stdout': {_c, m, _e -> s:IsortLineCallback(m)},
             \ 'on_exit': {_c, _m, _e -> s:IsortDoneCallback()},
+            \ 'stdout_buffered': v:true,
             \ })
 
         if exists('*chansend')
