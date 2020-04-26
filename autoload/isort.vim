@@ -1,18 +1,20 @@
-function! s:IsortLineCallback(formatted_line)
+function! s:IsortLineCallback(formatted_lines)
     if s:startline + s:line_counter <= s:endline
         " Modify an existing line
-        call setline(s:startline + s:line_counter, a:formatted_line)
+        call setline(s:startline + s:line_counter, a:formatted_lines)
     else
         " Add a new line
-        call append(s:endline, a:formatted_line)
+        call append(s:endline, a:formatted_lines)
         let s:endline += 1
     endif
 
     " Increment line counter
-    let s:line_counter += 1
+    let s:line_counter += len(a:formatted_lines)
 endfunction
 
 function! s:IsortDoneCallback()
+    unlet s:job
+
     " Delete extra lines if formatting has shortened our buffer
     if s:startline + s:line_counter <= s:endline
         let l:cursor_pos = getpos('.')
@@ -48,7 +50,7 @@ function! isort#Isort(startline, endline, ...)
     " Start job
     let l:cmd = 'isort -'
     let l:lines = join(getline(a:startline, a:endline), "\n")
-    if has('*jobstart')
+    if exists('*jobstart')
         " Neovim (async)
         if exists('s:job')
             call jobstop(s:job)
@@ -78,7 +80,7 @@ function! isort#Isort(startline, endline, ...)
         endif
 
         let s:job = job_start(l:cmd, {
-            \ 'callback': {_, m -> s:IsortLineCallback(m)},
+            \ 'callback': {_, m -> s:IsortLineCallback([m])},
             \ 'exit_cb': {_, _m -> s:IsortDoneCallback()},
             \ 'in_mode': 'nl',
             \ })
