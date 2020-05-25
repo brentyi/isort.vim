@@ -6,14 +6,19 @@ function! s:IsortLineCallback(formatted_lines)
     else
         let l:formatted_lines = a:formatted_lines
     endif
-    if s:startline + s:line_counter <= s:endline
-        " Modify an existing line
-        call setline(s:startline + s:line_counter, l:formatted_lines)
+    if s:start_line + s:line_counter <= s:end_line
+        " Modify existing lines
+        for l:offset in range(len(l:formatted_lines))
+            let l:line_number = s:start_line + s:line_counter + l:offset
+            if getline(l:line_number) !=# l:formatted_lines[l:offset]
+                call setline(l:line_number, l:formatted_lines[l:offset])
+            endif
+        endfor
     else
         " Add a new line
         echom string(l:formatted_lines)
-        call append(s:endline, l:formatted_lines)
-        let s:endline += len(l:formatted_lines)
+        call append(s:end_line, l:formatted_lines)
+        let s:end_line += len(l:formatted_lines)
     endif
 
     " Increment line counter
@@ -24,9 +29,9 @@ function! s:IsortDoneCallback()
     unlet s:job
 
     " Delete extra lines if formatting has shortened our buffer
-    if s:startline + s:line_counter <= s:endline
+    if s:start_line + s:line_counter <= s:end_line
         let l:cursor_pos = getpos('.')
-        execute (s:startline + s:line_counter) . ',' . s:endline . 'd _'
+        execute (s:start_line + s:line_counter) . ',' . s:end_line . 'd _'
         call setpos('.', l:cursor_pos)
     endif
 
@@ -36,7 +41,7 @@ function! s:IsortDoneCallback()
     endif
 endfunction
 
-function! isort#Isort(startline, endline, ...)
+function! isort#Isort(start_line, end_line, ...)
     " Make sure isort is installed
     if !executable('isort')
         echoerr 'isort is not installed!'
@@ -44,8 +49,8 @@ function! isort#Isort(startline, endline, ...)
     endif
 
     " Initialize (global-ish) state
-    let s:startline = a:startline
-    let s:endline = a:endline
+    let s:start_line = a:start_line
+    let s:end_line = a:end_line
     let s:line_counter = 0
 
     " Accept callback
@@ -57,7 +62,7 @@ function! isort#Isort(startline, endline, ...)
 
     " Start job
     let l:cmd = 'isort -'
-    let l:lines = join(getline(a:startline, a:endline), "\n")
+    let l:lines = join(getline(a:start_line, a:end_line), "\n")
     if exists('*jobstart')
         " Neovim (async)
         if exists('s:job')
@@ -102,7 +107,7 @@ function! isort#Isort(startline, endline, ...)
     else
         " Legacy (synchronous)
         let l:cursor_pos = getpos('.')
-        execute a:startline . ',' . a:endline . '! isort -'
+        execute a:start_line . ',' . a:end_line . '! isort -'
         call setpos('.', l:cursor_pos)
 
         " Done!

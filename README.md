@@ -43,7 +43,7 @@ augroup IsortMappings
 augroup END
 ```
 
-We can also add callback function via the
+We can also add a callback function via the
 `isort#Isort(startline, endline, callback)` function. For example, we can use
 vim-codefmt to format after sorting:
 
