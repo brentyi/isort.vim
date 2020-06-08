@@ -10,8 +10,14 @@ function! s:IsortLineCallback(formatted_lines)
         " Modify existing lines
         for l:offset in range(len(l:formatted_lines))
             let l:line_number = s:start_line + s:line_counter + l:offset
-            if getline(l:line_number) !=# l:formatted_lines[l:offset]
-                call setline(l:line_number, l:formatted_lines[l:offset])
+            if exists("*getbufline") && exists("*setbufline")
+                if getbufline(s:target_buffer, l:line_number)[0] !=# l:formatted_lines[l:offset]
+                    call setbufline(s:target_buffer, l:line_number, l:formatted_lines[l:offset])
+                endif
+            else
+                if getline(l:line_number) !=# l:formatted_lines[l:offset]
+                    call setline(l:line_number, l:formatted_lines[l:offset])
+                endif
             endif
         endfor
     else
@@ -52,6 +58,7 @@ function! isort#Isort(start_line, end_line, ...)
     let s:start_line = a:start_line
     let s:end_line = a:end_line
     let s:line_counter = 0
+    let s:target_buffer = bufnr("%")
 
     " Accept callback
     if a:0 == 1
