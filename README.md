@@ -1,4 +1,4 @@
-# isort.vim
+# Async isort plugin for Vim + Neovim
 
 A lighter, pure-Vimscript version of fisadev's wonderful
 [vim-isort](https://github.com/fisadev/vim-isort) plugin. Mostly written to

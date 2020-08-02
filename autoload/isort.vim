@@ -23,7 +23,11 @@ function! s:IsortLineCallback(formatted_lines)
     else
         " Add a new line
         echom string(l:formatted_lines)
-        call append(s:end_line, l:formatted_lines)
+        if exists("*appendbufline")
+            call appendbufline(s:target_buffer, s:end_line, l:formatted_lines)
+        else
+            call append(s:end_line, l:formatted_lines)
+        endif
         let s:end_line += len(l:formatted_lines)
     endif
 
@@ -37,7 +41,11 @@ function! s:IsortDoneCallback()
     " Delete extra lines if formatting has shortened our buffer
     if s:start_line + s:line_counter <= s:end_line
         let l:cursor_pos = getpos('.')
-        execute (s:start_line + s:line_counter) . ',' . s:end_line . 'd _'
+        if exists("*deletebufline")
+            call deletebufline(s:target_buffer, s:start_line + s:line_counter, s:end_line)
+        else
+            execute (s:start_line + s:line_counter) . ',' . s:end_line . 'd _'
+        endif
         call setpos('.', l:cursor_pos)
     endif
 
