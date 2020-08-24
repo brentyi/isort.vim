@@ -8,18 +8,26 @@ function! s:IsortLineCallback(formatted_lines)
     endif
     if s:start_line + s:line_counter <= s:end_line
         " Modify existing lines
-        for l:offset in range(len(l:formatted_lines))
-            let l:line_number = s:start_line + s:line_counter + l:offset
-            if exists("*getbufline") && exists("*setbufline")
-                if getbufline(s:target_buffer, l:line_number)[0] !=# l:formatted_lines[l:offset]
-                    call setbufline(s:target_buffer, l:line_number, l:formatted_lines[l:offset])
-                endif
-            else
-                if getline(l:line_number) !=# l:formatted_lines[l:offset]
-                    call setline(l:line_number, l:formatted_lines[l:offset])
-                endif
+        if exists("*setbufline")
+            " We compare against the current contents to avoid needlessly
+            " setting the file modified flag
+            let l:current_lines = getbufline(
+                \ s:target_buffer,
+                \ s:start_line + s:line_counter,
+                \ s:start_line + s:line_counter + len(l:formatted_lines) - 1)
+            if string(l:current_lines) !=# string(l:formatted_lines)
+                call setbufline(s:target_buffer, s:start_line + s:line_counter, l:formatted_lines)
             endif
-        endfor
+        else
+            " We compare against the current contents to avoid needlessly
+            " setting the file modified flag
+            let l:current_lines = getline(
+                \ s:start_line + s:line_counter,
+                \ s:start_line + s:line_counter + len(l:formatted_lines) - 1)
+            if string(l:current_lines) !=# string(l:formatted_lines)
+                call setline(s:start_line + s:line_counter, l:formatted_lines)
+            endif
+        endif
     else
         " Add a new line
         echom string(l:formatted_lines)
@@ -51,6 +59,7 @@ function! s:IsortDoneCallback()
 
     " Done!
     if exists('s:callback')
+        sleep 1m " Hack for making sure all changes are flushed
         call s:callback()
     endif
 endfunction
