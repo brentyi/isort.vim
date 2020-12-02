@@ -86,6 +86,10 @@ function! isort#Isort(start_line, end_line, ...)
 
     " Start job
     let l:cmd = 'isort -'
+    let l:isort_options = get(g:, 'isort_vim_options', '')
+    if l:isort_options != ''
+        let l:cmd .= ' ' . l:isort_options
+    endif
     let l:lines = join(getline(a:start_line, a:end_line), "\n")
     if exists('*jobstart')
         " Neovim (async)
