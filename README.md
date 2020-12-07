@@ -50,3 +50,11 @@ vim-codefmt to format after sorting:
 ```
 call isort#Isort(1, line('$'), function('codefmt#FormatBuffer'))
 ```
+
+## Configuration
+
+You can configure isort's [arguments](https://pycqa.github.io/isort/docs/configuration/options/):
+
+```vimscript
+let g:isort_vim_options = '-l 120 --wl 100 -m 2 --case-sensitive'
+```
