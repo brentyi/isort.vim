@@ -1,16 +1,18 @@
 # Async isort plugin for Vim + Neovim
 
 A lighter, pure-Vimscript version of fisadev's wonderful
-[vim-isort](https://github.com/fisadev/vim-isort) plugin. Mostly written to
-solve performance + virtual environment issues.
+[vim-isort](https://github.com/fisadev/vim-isort) plugin, which (a) solves some
+performance + virtual env issues and (b) adds automatic detection for
+first-party package names (by searching for a `setup.py` file).
 
-Equivalent to:
+Similar to:
 
 ```
 command! -range=% Isort :<line1>,<line2>! isort -
 ```
 
-...but significantly faster & without the annoying cursor jump.
+...significantly faster, without the annoying cursor jump, and with isort's
+`--project` flag automatically specified.
 
 Designed to run asynchronously in Vim 8 + Neovim, but also backward-compatible
 with older versions of Vim.
@@ -53,7 +55,8 @@ call isort#Isort(1, line('$'), function('codefmt#FormatBuffer'))
 
 ## Configuration
 
-You can configure isort's [arguments](https://pycqa.github.io/isort/docs/configuration/options/):
+You can configure isort's
+[arguments](https://pycqa.github.io/isort/docs/configuration/options/):
 
 ```vimscript
 let g:isort_vim_options = '-l 120 --wl 100 -m 2 --case-sensitive'

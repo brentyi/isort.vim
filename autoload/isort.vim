@@ -64,6 +64,24 @@ function! s:IsortDoneCallback()
     endif
 endfunction
 
+" Helper for finding first-party packages: recursively searches the directory
+" tree upward for a `setup.py` file
+function! s:FindFirstPartyPackageName(path)
+    " Base case: return 0 to indicate failure
+    if a:path == '/'
+        return ''
+    endif
+
+    " Recursively search for a package, marked by a `setup.py` file
+    if filereadable(a:path . '/setup.py')
+        " Found setup.py!
+        return fnamemodify(a:path, ':t')
+    else
+        " Keep trying
+        return s:FindFirstPartyPackageName(fnamemodify(a:path, ':h'))
+    endif
+endfunction
+
 function! isort#Isort(start_line, end_line, ...)
     " Make sure isort is installed
     if !executable('isort')
@@ -84,12 +102,20 @@ function! isort#Isort(start_line, end_line, ...)
         unlet s:callback
     endif
 
-    " Start job
     let l:cmd = 'isort -'
-    let l:isort_options = get(g:, 'isort_vim_options', '')
-    if l:isort_options != ''
-        let l:cmd .= ' ' . l:isort_options
+
+    " Find and add first-party package flag
+    let l:known_first_party = s:FindFirstPartyPackageName(expand('%:p'))
+    if l:known_first_party != ''
+        let l:cmd .= ' --project ' . l:known_first_party
     endif
+
+    " Add global options
+    if exists('g:isort_vim_options')
+        let l:cmd .= ' ' . g:isort_vim_options
+    endif
+
+    " Start job
     let l:lines = join(getline(a:start_line, a:end_line), "\n")
     if exists('*jobstart')
         " Neovim (async)
