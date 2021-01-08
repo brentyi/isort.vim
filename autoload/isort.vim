@@ -1,11 +1,5 @@
 function! s:IsortLineCallback(formatted_lines)
-    if has('nvim')
-        " We get an extra blank line in Neovim
-        " Not really sure why...
-        let l:formatted_lines = a:formatted_lines[:-2]
-    else
-        let l:formatted_lines = a:formatted_lines
-    endif
+    let l:formatted_lines = a:formatted_lines
     if s:start_line + s:line_counter <= s:end_line
         " Modify existing lines
         if exists("*setbufline")
@@ -161,7 +155,7 @@ function! isort#Isort(start_line, end_line, ...)
     else
         " Legacy (synchronous)
         let l:cursor_pos = getpos('.')
-        execute a:start_line . ',' . a:end_line . '! isort -'
+        execute a:start_line . ',' . a:end_line . '! ' . l:cmd
         call setpos('.', l:cursor_pos)
 
         " Done!
