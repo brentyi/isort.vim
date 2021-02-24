@@ -79,7 +79,7 @@ endfunction
 function! isort#Isort(start_line, end_line, ...)
     " Make sure isort is installed
     if !executable('isort')
-        echoerr 'isort is not installed!'
+        echom 'Tried to sort imports, but isort was not found!'
         return
     endif
 
