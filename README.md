@@ -68,7 +68,7 @@ let g:isort_vim_options = '-l 120 --wl 100 -m 2 --case-sensitive'
 
 Here's an example for following formatting standards enforced by
 [black](https://github.com/psf/black), ported from
-[here](https://black.readthedocs.io/en/stable/compatible_configs.html#isort):
+[here](https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#isort):
 
 ```vimscript
 let g:isort_vim_options = join([
