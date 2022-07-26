@@ -1,21 +1,27 @@
-# Async isort plugin for Vim + Neovim
+# isort.vim
 
-A lighter, pure-Vimscript version of fisadev's wonderful
-[vim-isort](https://github.com/fisadev/vim-isort) plugin, which (a) solves some
-performance + virtual env issues and (b) adds automatic detection for
-first-party package names by searching parent directories for a `setup.py` file.
+Plugin for sorting Python imports in Vim and Neovim via `isort`. Inspired by
+[fisadev/vim-isort](https://github.com/fisadev/vim-isort), but with a few
+differentiating features:
 
-Similar to:
+- Written in VimScript instead of Python: this is faster, less sensitive to
+  virtual environment issues, and runs on vim builds without the `+python`
+  feature.
+- Adds automatic detection for first-party package names, by searching parent
+  directories for `setup.py` or `pyproject.toml` files.
+- Attempts to be minimally obtrusive: runs asynchronously where possible, with
+  support for both Vim 8 and Neovim's job APIs.
 
-```
-command! -range=% Isort :<line1>,<line2>! isort -
-```
+---
 
-But faster, without the annoying cursor jump, and with isort's `--project` flag
-automatically specified.
+<!-- vim-markdown-toc GFM -->
 
-Designed to run asynchronously in Vim 8 + Neovim, but also backward-compatible
-with older versions of Vim.
+* [Installation](#installation)
+* [Usage](#usage)
+* [Configuration](#configuration)
+* [Alternatives](#alternatives)
+
+<!-- vim-markdown-toc -->
 
 ## Installation
 
@@ -25,8 +31,8 @@ with older versions of Vim.
   pip install isort
   ```
 
-- Install `isort.vim` in your `.vimrc` via your favorite plugin manager; I use
-  `vim-plug`:
+- Install `isort.vim` in your `.vimrc` via your favorite plugin manager, for
+  example, `vim-plug`:
 
   ```vimscript
   Plug 'brentyi/isort.vim'
@@ -53,14 +59,13 @@ to use [vim-codefmt](https://github.com/google/vim-codefmt) to format after
 sorting:
 
 ```
-call isort#Isort(1, line('$'), function('codefmt#FormatBuffer'))
+:call isort#Isort(1, line('$'), function('codefmt#FormatBuffer'))
 ```
 
 ## Configuration
 
-You can configure additional CLI
-[arguments](https://pycqa.github.io/isort/docs/configuration/options/) for
-`isort` via `g:isort_vim_options`:
+[Additional CLI arguments for isort](https://pycqa.github.io/isort/docs/configuration/options/)
+can be configured via `g:isort_vim_options`:
 
 ```vimscript
 let g:isort_vim_options = '-l 120 --wl 100 -m 2 --case-sensitive'
@@ -68,7 +73,7 @@ let g:isort_vim_options = '-l 120 --wl 100 -m 2 --case-sensitive'
 
 Here's an example for following formatting standards enforced by
 [black](https://github.com/psf/black), ported from
-[here](https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#isort):
+[the isort documentation](https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#isort):
 
 ```vimscript
 let g:isort_vim_options = join([
@@ -80,3 +85,24 @@ let g:isort_vim_options = join([
 	\ '--line-length 88',
 	\ ], ' ')
 ```
+
+Or, assuming `isort>=5.0.0`, simply:
+
+```vimscript
+let g:isort_vim_options = '--profile black'
+```
+
+## Alternatives
+
+- [fisadev/vim-isort](https://github.com/fisadev/vim-isort) is the original
+  isort plugin for Vim, and the primary inspiration for ours.
+
+- [google/vim-codefmt](https://github.com/google/vim-codefmt) has basic support
+  for `isort` as a code formatter.
+
+- If you don't need bells and whistles or mind a cursor jump each time you sort
+  imports, a rudimentary `:Isort` command can be trivially implemented:
+
+  ```
+  command! -range=% Isort :<line1>,<line2>! isort -
+  ```

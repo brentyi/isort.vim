@@ -60,19 +60,17 @@ endfunction
 
 " Helper for finding first-party packages: recursively searches the directory
 " tree upward for a `setup.py` file
-function! s:FindFirstPartyPackageName(path)
-    " Base case: return 0 to indicate failure
-    if a:path == '/'
-        return ''
-    endif
-
+function! FindPackageRoot(path)
     " Recursively search for a package, marked by a `setup.py` file
-    if filereadable(a:path . '/setup.py')
-        " Found setup.py!
-        return fnamemodify(a:path, ':t')
+    if filereadable(a:path . '/setup.py') || filereadable(a:path . '/pyproject.toml')
+        " Found root.
+        return a:path
+    elseif a:path == '/'
+        " No more parent directories
+        return '.'
     else
         " Keep trying
-        return s:FindFirstPartyPackageName(fnamemodify(a:path, ':h'))
+        return FindPackageRoot(fnamemodify(a:path, ':h'))
     endif
 endfunction
 
@@ -98,11 +96,8 @@ function! isort#Isort(start_line, end_line, ...)
 
     let l:cmd = 'isort -'
 
-    " Find and add first-party package flag
-    let l:known_first_party = s:FindFirstPartyPackageName(expand('%:p'))
-    if l:known_first_party != ''
-        let l:cmd .= ' --project ' . l:known_first_party
-    endif
+    " Find the root of the package; we'll use this as our working directory
+    let l:package_root = FindPackageRoot(expand('%:p'))
 
     " Add global options
     if exists('g:isort_vim_options')
@@ -121,6 +116,7 @@ function! isort#Isort(start_line, end_line, ...)
             \ 'on_stdout': {_c, m, _e -> s:IsortLineCallback(m)},
             \ 'on_exit': {_c, _m, _e -> s:IsortDoneCallback()},
             \ 'stdout_buffered': v:true,
+            \ 'cwd': l:package_root,
             \ })
 
         if exists('*chansend')
@@ -145,6 +141,7 @@ function! isort#Isort(start_line, end_line, ...)
             \ 'callback': {_, m -> s:IsortLineCallback([m])},
             \ 'exit_cb': {_, _m -> s:IsortDoneCallback()},
             \ 'in_mode': 'nl',
+            \ 'cwd': l:package_root,
             \ })
 
         let l:channel = job_getchannel(s:job)
@@ -164,3 +161,4 @@ function! isort#Isort(start_line, end_line, ...)
         endif
     endif
 endfunction
+
