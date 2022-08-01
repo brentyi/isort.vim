@@ -53,13 +53,19 @@ augroup IsortMappings
 augroup END
 ```
 
-We can also add a callback function via the
-`isort#Isort(startline, endline, callback)` function. For example, one option is
+More advanced usage is possible with the
+`isort#Isort(startline, endline, [callback, [enable_async]])` function. For example, one option is
 to use [vim-codefmt](https://github.com/google/vim-codefmt) to format after
 sorting:
 
 ```
 :call isort#Isort(1, line('$'), function('codefmt#FormatBuffer'))
+```
+
+Disabling async sorting is helpful for sorting automatically before saving:
+
+```vimscript
+autocmd BufWritePre *.py call isort#Isort(0, line('$'), v:null, v:false)
 ```
 
 ## Configuration

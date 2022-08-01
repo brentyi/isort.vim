@@ -52,7 +52,7 @@ function! s:IsortDoneCallback()
     endif
 
     " Done!
-    if exists('s:callback')
+    if s:callback != 0
         sleep 1m " Hack for making sure all changes are flushed
         call s:callback()
     endif
@@ -86,12 +86,18 @@ function! isort#Isort(start_line, end_line, ...)
     let s:end_line = a:end_line
     let s:line_counter = 0
     let s:target_buffer = bufnr("%")
+    let s:callback = 0
 
-    " Accept callback
+    " Optional arguments: callback, async preference
+    let l:enable_async = 1
     if a:0 == 1
         let s:callback = a:1
-    elseif exists('s:callback')
-        unlet s:callback
+    elseif a:0 == 2
+        let s:callback = a:1
+        let l:enable_async = a:2
+    else
+        echoerr "isort#Isort got the wrong number of arguments!"
+        return
     endif
 
     let l:cmd = 'isort -'
@@ -106,7 +112,7 @@ function! isort#Isort(start_line, end_line, ...)
 
     " Start job
     let l:lines = join(getline(a:start_line, a:end_line), "\n")
-    if exists('*jobstart')
+    if l:enable_async && exists('*jobstart')
         " Neovim (async)
         if exists('s:job')
             call jobstop(s:job)
@@ -115,7 +121,7 @@ function! isort#Isort(start_line, end_line, ...)
         let s:job = jobstart(l:cmd, {
             \ 'on_stdout': {_c, m, _e -> s:IsortLineCallback(m)},
             \ 'on_exit': {_c, _m, _e -> s:IsortDoneCallback()},
-            \ 'stdout_buffered': v:true,
+            \ 'stdout_buffered': 1,
             \ 'cwd': l:package_root,
             \ })
 
@@ -129,7 +135,7 @@ function! isort#Isort(start_line, end_line, ...)
             call jobclose(s:job, 'stdin')
         endif
 
-    elseif v:version >= 800
+    elseif l:enable_async && v:version >= 800
         " Vim 8 (async)
         " Note that 7.4 can be compiled with the +job flag, but the API has
         " evolved a lot...
@@ -150,13 +156,13 @@ function! isort#Isort(start_line, end_line, ...)
             call ch_close_in(l:channel)
         endif
     else
-        " Legacy (synchronous)
+        " Synchronous call.
         let l:cursor_pos = getpos('.')
         execute a:start_line . ',' . a:end_line . '! ' . l:cmd
         call setpos('.', l:cursor_pos)
 
         " Done!
-        if exists('s:callback')
+        if s:callback != 0
             call s:callback()
         endif
     endif
