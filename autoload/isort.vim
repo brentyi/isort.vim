@@ -110,6 +110,10 @@ function! isort#Isort(start_line, end_line, ...)
         let l:cmd .= ' ' . g:isort_vim_options
     endif
 
+    " Suppress stderr. Note that this is optional for the Neovim async
+    " implementation, which reads directly from stdout.
+    let l:cmd .= ' 2>/dev/null'
+
     " Start job
     let l:lines = join(getline(a:start_line, a:end_line), "\n")
     if l:enable_async && exists('*jobstart')
