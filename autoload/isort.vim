@@ -90,7 +90,7 @@ function! isort#Isort(start_line, end_line, ...)
 
     " Optional arguments: callback, async preference
     let l:enable_async = 1
-    if a:0 >= 2
+    if a:0 > 2
         echoerr "isort#Isort got the wrong number of arguments!"
         return
     elseif a:0 == 2
